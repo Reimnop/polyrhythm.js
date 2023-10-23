@@ -34,6 +34,7 @@ export class Converter {
         const palette = generateColorPalette(scene, this.configuration.shadingDepth, this.configuration.colorResolution);
 
         // Initialize pipeline
+        this.initializeCallback?.();
         const pipeline = new Pipeline(
             scene, 
             sceneTransformer,
