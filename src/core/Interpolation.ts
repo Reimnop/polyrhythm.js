@@ -12,7 +12,7 @@ export function interpolate<T>(time: number, keys: TypedKey<T>[], interpolator: 
     if (time < keys[0].time)
         return keys[0].value;
 
-    if (time > keys[keys.length - 1].time)
+    if (time >= keys[keys.length - 1].time)
         return keys[keys.length - 1].value;
 
     const index = searchForKeyPair(time, keys);

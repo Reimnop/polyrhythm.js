@@ -1,4 +1,4 @@
-import { quat, vec3 } from "gl-matrix";
+import { vec3 } from "gl-matrix";
 
 export enum SceneLightType {
     Directional,
@@ -15,5 +15,4 @@ export interface SceneLight {
     outerConeAngle: number;
     range: number;
     falloff: number;
-    rotation: quat;
 }

@@ -47,7 +47,7 @@ export class Converter {
         const frames: RenderedFrame[] = [];
         for (var t = 0.0; t < this.configuration.duration; t += frameDuration) {
             this.updateCallback?.(t);
-            const triangles = pipeline.render(this.configuration.frameSize[0] / this.configuration.frameSize[1]);
+            const triangles = pipeline.render(this.configuration.aspectRatio);
             const frame: RenderedFrame = {
                 triangles: [...triangles]
             }
@@ -63,11 +63,13 @@ export class Converter {
             pool.addFrame(i * frameDuration, [...Converter.getRightTriangles(frames[i], palette)]);
         }
 
+        const animatedRightTriangles = [...pool.buildPrefabTriangles()];
+
         // Return render result
         return {
-            animatedRightTriangles: [...pool.buildPrefabTriangles()],
+            animatedRightTriangles,
             colorPalette: palette,
-            totalTriangleCount: maxTrianglesCount,
+            totalTriangleCount: animatedRightTriangles.length,
             totalFrameCount: frames.length
         };
     }
@@ -92,25 +94,25 @@ export class Converter {
                 c: vec2.fromValues(triangle.c[0], triangle.c[1])
             };
 
-            const rightTriangles = computeRightTriangles(triangle2d);
-            const transform0 = computeRightTriangleTransform(rightTriangles[0]);
-            const transform1 = computeRightTriangleTransform(rightTriangles[1]);
+            const triangleTransforms = 
+                computeRightTriangles(triangle2d)
+                    .map(computeRightTriangleTransform);
 
             // Get color
             const themeColor = Converter.getThemeColor(shadedTriangle.color, colors);
 
             yield {
-                position: transform0.position,
-                scale: transform0.scale,
-                rotation: transform0.rotation,
+                position: triangleTransforms[0].position,
+                scale: triangleTransforms[0].scale,
+                rotation: triangleTransforms[0].rotation,
                 depth: depth,
                 themeColor: themeColor
             };
 
             yield {
-                position: transform1.position,
-                scale: transform1.scale,
-                rotation: transform1.rotation,
+                position: triangleTransforms[1].position,
+                scale: triangleTransforms[1].scale,
+                rotation: triangleTransforms[1].rotation,
                 depth: depth,
                 themeColor: themeColor
             };

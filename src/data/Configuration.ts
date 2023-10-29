@@ -8,6 +8,6 @@ export interface Configuration {
     shadingDepth: number;
     colorResolution: number;
     duration: number;
+    aspectRatio: number;
     frameRate: number;
-    frameSize: vec2;
 }

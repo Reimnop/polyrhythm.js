@@ -12,7 +12,7 @@ export class TriangleShaderSolidColor implements Shader<Triangle<StagingVertex>,
             b: b.position,
             c: c.position
         };
-        const color: vec3 = vec3.fromValues(
+        const color = vec3.fromValues(
             (a.color[0] + b.color[0] + c.color[0]) / 3.0,
             (a.color[1] + b.color[1] + c.color[1]) / 3.0,
             (a.color[2] + b.color[2] + c.color[2]) / 3.0
@@ -20,7 +20,7 @@ export class TriangleShaderSolidColor implements Shader<Triangle<StagingVertex>,
         return {
             triangle,
             color
-        }
+        };
     }
 
     processVertex(vertex: StagingVertex): { position: vec3, color: vec3 } {
@@ -33,6 +33,6 @@ export class TriangleShaderSolidColor implements Shader<Triangle<StagingVertex>,
                     vertex.position[2] / vertex.position[3]
                 ),
             color: color
-        }
+        };
     }
 }

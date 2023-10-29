@@ -1,4 +1,6 @@
 import typescript from "@rollup/plugin-typescript";
+import nodeResolve from "@rollup/plugin-node-resolve";
+import commonjs from "@rollup/plugin-commonjs";
 
 export default [
     {
@@ -12,12 +14,10 @@ export default [
                 "fluent-iterable": "fluent"
             }
         },
-        external: [
-            "gl-matrix",
-            "fluent-iterable"
-        ],
         plugins: [
-            typescript()
+            typescript(),
+            commonjs(),
+            nodeResolve()
         ]
     }
 ];

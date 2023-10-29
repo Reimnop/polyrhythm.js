@@ -29,7 +29,7 @@ export function computeRightTriangles(triangle: Triangle<vec2>): Triangle<vec2>[
                 vec2.subtract(vec2.create(), triangle.a, triangle.c)
             ) 
         }
-    ]
+    ];
     // Sort by angle (descending)
     anglePointPairs.sort((a, b) => b.angle - a.angle);
 
@@ -50,7 +50,7 @@ export function computeRightTriangles(triangle: Triangle<vec2>): Triangle<vec2>[
             b: anglePointPairs[0].position,
             c: anglePointPairs[2].position
         }
-    ]
+    ];
 }
 
 export function computeRightTriangleTransform(triangle: Triangle<vec2>): { position: vec2, scale: vec2, rotation: number } {
@@ -62,7 +62,7 @@ export function computeRightTriangleTransform(triangle: Triangle<vec2>): { posit
     const position = triangle.a;
     const rotation = Math.atan2(ABDir[1], ABDir[0]);
     const rotatedACDir = rotateVec2(ACDir, -rotation);
-    const scale = vec2.fromValues(1.0, rotatedACDir[1] < 0.0 ? -vec2.length(AC) : vec2.length(AC));
+    const scale = vec2.fromValues(vec2.length(AB), rotatedACDir[1] < 0.0 ? -vec2.length(AC) : vec2.length(AC));
     return { position, scale, rotation };
 }
 

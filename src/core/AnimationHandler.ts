@@ -24,7 +24,7 @@ class TransformableNode {
     }
 }
 
-export class AnimnationHandler implements SceneTransformer {
+export class AnimationHandler implements SceneTransformer {
     private readonly nodes: Map<string, TransformableNode>;
     private animation: SceneAnimation | null = null;
 
@@ -57,7 +57,7 @@ export class AnimnationHandler implements SceneTransformer {
         if (!this.animation)
             return;
 
-        const ticks = time * this.animation.ticksPerSecond % this.animation.durationInTicks;
+        const ticks = (time * this.animation.ticksPerSecond) % this.animation.durationInTicks;
         for (const [name, node] of this.nodes) {
             const nodeAnimation = this.animation.getNodeAnimation(name);
             if (!nodeAnimation)

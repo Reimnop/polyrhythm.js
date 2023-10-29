@@ -14,7 +14,7 @@ class StagingPrefabObject {
         this.killTime = Math.max(this.killTime, time);
     }
 
-    addKeys(time: number, position: vec2, scale: vec2, rotation: number, color: number) {
+    pushKeys(time: number, position: vec2, scale: vec2, rotation: number, color: number) {
         if (this.positionKeys.length === 0 || this.positionKeys[this.positionKeys.length - 1].value !== position)
             this.positionKeys.push({ time, value: position });
         if (this.scaleKeys.length === 0 || this.scaleKeys[this.scaleKeys.length - 1].value !== scale)
@@ -48,13 +48,21 @@ export class PrefabObjectPool {
         // Add triangles to staging objects
         for (let i = 0; i < triangles.length; i++) {
             const triangle = triangles[i];
-            const position = vec2.fromValues(triangle.position[0], triangle.position[1]);
-            const scale = vec2.fromValues(triangle.scale[0], triangle.scale[1]);
+            const position = triangle.position;
+            const scale = triangle.scale;
             const rotation = triangle.rotation;
             const color = triangle.themeColor;
             const stagingObject = this.stagingObjects[i];
-            stagingObject.addKeys(time, position, scale, rotation, color);
+            stagingObject.pushKeys(time, position, scale, rotation, color);
             stagingObject.ensureAlive(time);
+        }
+        for (let i = triangles.length; i < this.capacity; i++) {
+            const position = vec2.fromValues(0.0, 0.0);
+            const scale = vec2.fromValues(0.0, 0.0);
+            const rotation = 0.0;
+            const color = 0;
+            this.stagingObjects[i].pushKeys(time, position, scale, rotation, color);
+            // We don't ensureAlive here because we are not sure if it is alive or not
         }
     }
 
@@ -63,7 +71,7 @@ export class PrefabObjectPool {
         const depthEnd = 80.0;
         const depthStep = (depthEnd - depthStart) / this.capacity;
         for (const [i, stagingObject] of this.stagingObjects.entries()) {
-            if (stagingObject.killTime <= stagingObject.startTime)
+            if (stagingObject.startTime > stagingObject.killTime)
                 continue;
             const depth = Math.floor(depthStart + i * depthStep);
             yield {

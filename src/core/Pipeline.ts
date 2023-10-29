@@ -1,5 +1,5 @@
 import { mat4, quat, vec3 } from "gl-matrix";
-import { InputVertex, Scene, SceneLightType, SceneNode, ShadedTriangle, StagingVertex, Triangle, Vertex } from "../data";
+import { InputVertex, Scene, SceneLightType, SceneNode, ShadedTriangle, StagingVertex, Triangle } from "../data";
 import { SceneTransformer } from "./SceneTransformer";
 import { Shader } from "./shader";
 import { assembleVertices } from "./VertexAssembly";
@@ -48,9 +48,12 @@ export class Pipeline {
 
         // Get camera transform
         const cameraTransform = this.getNodeTransform(cameraNode);
+        const cameraPosition = mat4.getTranslation(vec3.create(), cameraTransform);
+        const cameraRotation = mat4.getRotation(quat.create(), cameraTransform);
+        quat.multiply(cameraRotation, cameraRotation, camera.rotation);
 
         // Calculate view and projection matrices
-        const view = mat4.invert(mat4.create(), cameraTransform);
+        const view = mat4.invert(mat4.create(), mat4.fromRotationTranslation(mat4.create(), cameraRotation, cameraPosition));
         const projection = mat4.perspective(mat4.create(), camera.horizontalFov / aspectRatio, aspectRatio, camera.nearClipPlane, camera.farClipPlane);
 
         // Process render data
@@ -60,10 +63,10 @@ export class Pipeline {
         const triangles = fluent(assembleVertices(stagingVertices));
 
         // Return shaded triangles
-        return this.processTriangles(triangles);
+        return this.processTriangles(triangles, cameraRotation);
     }
 
-    private processTriangles(triangles: FluentIterable<Triangle<StagingVertex>>): FluentIterable<ShadedTriangle> {
+    private processTriangles(triangles: FluentIterable<Triangle<StagingVertex>>, cameraRotation: quat): FluentIterable<ShadedTriangle> {
         const ambientColor = vec3.fromValues(0.1, 0.1, 0.1);
         const directionalLight = this.scene.lights.find(light => light.type === SceneLightType.Directional);
         if (!directionalLight)
@@ -72,8 +75,8 @@ export class Pipeline {
         if (!node)
             throw new Error(`Node ${directionalLight.name} not found!`);
         const lightTransform = this.getNodeTransform(node);
-        const lightRotation = quat.multiply(quat.create(), directionalLight.rotation, mat4.getRotation(quat.create(), lightTransform));
-        const lightDirection = vec3.transformQuat(vec3.create(), vec3.fromValues(0.0, 0.0, -1.0), lightRotation);
+        const lightRotation = quat.multiply(quat.create(), cameraRotation, mat4.getRotation(quat.create(), lightTransform));
+        const lightDirection = vec3.normalize(vec3.create(), vec3.transformQuat(vec3.create(), vec3.fromValues(0.0, 0.0, -1.0), lightRotation));
         const triangleShader = this.triangleShaderFactory(ambientColor, lightDirection);
         return triangles.map(triangle => triangleShader.process(triangle));
     }
@@ -85,25 +88,27 @@ export class Pipeline {
         });
     }
 
-    private *collectRenderData(node: SceneNode, transform: mat4): Iterable<RenderData> {
-        const model = mat4.multiply(mat4.create(), transform, this.getNodeTransform(node));
+    private *collectRenderData(node: SceneNode, parentTransform: mat4): Iterable<RenderData> {
+        const model = mat4.multiply(mat4.create(), parentTransform, this.getNodeTransform(node));
 
         // Create and yield render data from meshes
         for (const nodeMesh of node.meshes) {
             const mesh = this.scene.meshes[nodeMesh.meshIndex];
             const material = this.scene.materials[nodeMesh.materialIndex];
-            const vertices = fluent(mesh.vertices).map((vertex): InputVertex => {
-                return {
-                    position: vertex.position,
-                    normal: vertex.normal,
-                    color: vertex.color,
-                    albedo: material.albedo
-                };
-            });
+            const vertices = fluent(mesh.indices)
+                .map(index => mesh.vertices[index])
+                .map((vertex): InputVertex => {
+                    return {
+                        position: vertex.position,
+                        normal: vertex.normal,
+                        color: vertex.color,
+                        albedo: material.albedo
+                    };
+                });
             const renderData: RenderData = {
                 vertices,
                 model
-            }
+            };
             yield renderData;
         }
 
