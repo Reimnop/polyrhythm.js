@@ -1,6 +1,7 @@
 import typescript from "@rollup/plugin-typescript";
 import nodeResolve from "@rollup/plugin-node-resolve";
 import commonjs from "@rollup/plugin-commonjs";
+import terser from "@rollup/plugin-terser";
 
 export default [
     {
@@ -9,6 +10,7 @@ export default [
             dir: "build",
             format: "umd",
             name: "polyrhythmjs",
+            sourcemap: true,
             globals: {
                 "gl-matrix": "glMatrix",
                 "fluent-iterable": "fluent"
@@ -17,7 +19,8 @@ export default [
         plugins: [
             typescript(),
             commonjs(),
-            nodeResolve()
+            nodeResolve(),
+            terser()
         ]
     }
 ];
