@@ -1,9 +1,9 @@
 import { Triangle } from "../data";
 
-export function* assembleVertices<T>(vertices: Iterable<T>): Iterable<Triangle<T>> {
+export function* assembleVertices<T>(vertices: T[], indices: number[]): Iterable<Triangle<T>> {
     const vertexQueue: T[] = [];
-    for (const vertex of vertices) {
-        vertexQueue.push(vertex);
+    for (const index of indices) {
+        vertexQueue.push(vertices[index]);
         if (vertexQueue.length === 3) {
             yield {
                 a: vertexQueue[0],

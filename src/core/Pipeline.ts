@@ -9,8 +9,14 @@ export type VertexShaderFactory<TIn, TOut> = (model: mat4, view: mat4, projectio
 export type TriangleShaderFactory<TIn, TOut> = (ambientColor: vec3, lightDirection: vec3) => Shader<TIn, TOut>;
 
 type RenderData = {
-    vertices: FluentIterable<InputVertex>,
+    vertices: InputVertex[],
+    indices: number[],
     model: mat4
+}
+
+type StagingRenderData = {
+    vertices: StagingVertex[],
+    indices: number[]
 }
 
 export class Pipeline {
@@ -57,10 +63,11 @@ export class Pipeline {
         const projection = mat4.perspective(mat4.create(), camera.horizontalFov / aspectRatio, aspectRatio, camera.nearClipPlane, camera.farClipPlane);
 
         // Process render data
-        const stagingVertices = this.processRenderData(renderDatas, view, projection);
+        const stagingRenderDatas = this.processRenderData(renderDatas, view, projection);
 
         // Assemble staging vertices into triangles
-        const triangles = fluent(assembleVertices(stagingVertices));
+        const triangles = fluent(stagingRenderDatas)
+            .flatten(stagingRenderData => assembleVertices(stagingRenderData.vertices, stagingRenderData.indices));
 
         // Return shaded triangles
         return this.processTriangles(triangles, cameraRotation);
@@ -81,10 +88,14 @@ export class Pipeline {
         return triangles.map(triangle => triangleShader.process(triangle));
     }
 
-    private processRenderData(renderDatas: FluentIterable<RenderData>, view: mat4, projection: mat4): FluentIterable<StagingVertex> {
-        return renderDatas.flatten(renderData => {
+    private processRenderData(renderDatas: FluentIterable<RenderData>, view: mat4, projection: mat4): FluentIterable<StagingRenderData> {
+        return renderDatas.map(renderData => {
             const vertexShader = this.vertexShaderFactory(renderData.model, view, projection);
-            return renderData.vertices.map(vertex => vertexShader.process(vertex));
+            const vertices = renderData.vertices.map(vertex => vertexShader.process(vertex));
+            return {
+                vertices: [...vertices],
+                indices: renderData.indices
+            };
         });
     }
 
@@ -95,9 +106,8 @@ export class Pipeline {
         for (const nodeMesh of node.meshes) {
             const mesh = this.scene.meshes[nodeMesh.meshIndex];
             const material = this.scene.materials[nodeMesh.materialIndex];
-            const vertices = fluent(mesh.indices)
-                .map(index => mesh.vertices[index])
-                .map((vertex): InputVertex => {
+            const vertices = fluent(mesh.vertices)
+                .map(vertex => {
                     return {
                         position: vertex.position,
                         normal: vertex.normal,
@@ -105,11 +115,11 @@ export class Pipeline {
                         albedo: material.albedo
                     };
                 });
-            const renderData: RenderData = {
-                vertices,
+            yield {
+                vertices: [...vertices],
+                indices: mesh.indices,
                 model
             };
-            yield renderData;
         }
 
         // Recursively collect render data from child nodes
