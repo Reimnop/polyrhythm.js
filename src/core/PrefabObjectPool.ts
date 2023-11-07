@@ -39,7 +39,7 @@ export class PrefabObjectPool {
 
     addFrame(time: number, triangles: RightTriangle[]) {
         // Sort by render depth
-        triangles.sort((a, b) => a.depth - b.depth);
+        triangles.sort((a, b) => b.depth - a.depth);
 
         // Check if it exceeds capacity
         if (triangles.length > this.capacity)
@@ -73,7 +73,7 @@ export class PrefabObjectPool {
         for (const [i, stagingObject] of this.stagingObjects.entries()) {
             if (stagingObject.startTime > stagingObject.killTime)
                 continue;
-            const depth = Math.round(depthStart + i * depthStep);
+            const depth = Math.round(depthEnd - i * depthStep);
             yield {
                 positionKeys: stagingObject.positionKeys,
                 scaleKeys: stagingObject.scaleKeys,
