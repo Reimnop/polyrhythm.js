@@ -1,6 +1,6 @@
 {
   "name": "polyrhythmjs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Converts 3D models to Project Arrhythmia assets.",
   "scripts": {
     "build": "rollup -c"
@@ -14,6 +14,7 @@
   "files": [
     "build"
   ],
+  "type": "module",
   "author": "Reimnop",
   "license": "MIT",
   "dependencies": {
