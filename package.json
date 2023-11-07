@@ -1,5 +1,5 @@
 {
-  "name": "polyrhythm",
+  "name": "polyrhythmjs",
   "version": "1.0.0",
   "description": "Converts 3D models to Project Arrhythmia assets.",
   "scripts": {
