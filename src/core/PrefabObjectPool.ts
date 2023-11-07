@@ -15,9 +15,9 @@ class StagingPrefabObject {
     }
 
     pushKeys(time: number, position: vec2, scale: vec2, rotation: number, color: number) {
-        if (this.positionKeys.length === 0 || this.positionKeys[this.positionKeys.length - 1].value !== position)
+        if (this.positionKeys.length === 0 || this.positionKeys[this.positionKeys.length - 1].value[0] !== position[0] || this.positionKeys[this.positionKeys.length - 1].value[1] !== position[1])
             this.positionKeys.push({ time, value: position });
-        if (this.scaleKeys.length === 0 || this.scaleKeys[this.scaleKeys.length - 1].value !== scale)
+        if (this.scaleKeys.length === 0 || this.scaleKeys[this.scaleKeys.length - 1].value[0] !== scale[0] || this.scaleKeys[this.scaleKeys.length - 1].value[1] !== scale[1])
             this.scaleKeys.push({ time, value: scale });
         if (this.rotationKeys.length === 0 || this.rotationKeys[this.rotationKeys.length - 1].value !== rotation)
             this.rotationKeys.push({ time, value: rotation });
