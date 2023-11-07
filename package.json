@@ -5,6 +5,15 @@
   "scripts": {
     "build": "rollup -c"
   },
+  "homepage": "https://github.com/Reimnop/polyrhythm.js",
+  "repository": {
+    "type": "github",
+    "url": "https://github.com/Reimnop/polyrhythm.js"
+  },
+  "main": "build/index.js",
+  "files": [
+    "build"
+  ],
   "author": "Reimnop",
   "license": "MIT",
   "dependencies": {
