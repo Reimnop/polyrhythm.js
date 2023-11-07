@@ -73,7 +73,7 @@ export class PrefabObjectPool {
         for (const [i, stagingObject] of this.stagingObjects.entries()) {
             if (stagingObject.startTime > stagingObject.killTime)
                 continue;
-            const depth = Math.floor(depthStart + i * depthStep);
+            const depth = Math.round(depthEnd - i * depthStep);
             yield {
                 positionKeys: stagingObject.positionKeys,
                 scaleKeys: stagingObject.scaleKeys,
