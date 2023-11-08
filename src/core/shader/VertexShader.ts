@@ -24,7 +24,7 @@ export class VertexShader implements Shader<InputVertex, StagingVertex> {
         return {
             position,
             normal: vec3.fromValues(normal[0], normal[1], normal[2]),
-            color: input.color
+            color: vec3.multiply(vec3.create(), input.color, input.albedo)
         };
     }
 }
